@@ -72,3 +72,8 @@
 </body>
 </html>
 
+<?php 
+    require_once "util/banco.php";
+
+?>
+

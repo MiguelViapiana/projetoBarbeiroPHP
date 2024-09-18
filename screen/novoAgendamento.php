@@ -6,6 +6,8 @@
     <title>Adicionar Novo Agendamento</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <style>
         .header {
             background-color: #343a40;
@@ -21,6 +23,32 @@
     </style>
 </head>
 <body>
+
+         <!-- SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script>
+        // Função para mostrar um alerta com SweetAlert
+        function showAlert(message) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Aviso',
+                text: message,
+                confirmButtonText: 'OK'
+            });
+        }
+
+        function successAlert(){
+            Swal.fire({
+            title: "Sucesso!!",
+            text: "Agendamento realizado!",
+            icon: "success"
+            });
+        }
+
+        // Exemplo de uso
+        // showAlert('Seu alerta foi disparado!');
+    </script>
+
     <!-- Cabeçalho -->
     <header class="header">
         <div class="container">
@@ -33,44 +61,81 @@
         </ul>
     </header>
 
-
-
     <!-- Conteúdo Principal -->
     <main class="container my-4">
         <div class="row">
            
             <div class="col-md-8 offset-md-2">
                 <h2 class="text-center">Formulário de Novo Agendamento</h2>
-                <form>
+                <form method="post">
                     <div class="form-group">
                         <label for="clientName">Nome do Cliente</label>
-                        <input type="text" class="form-control" id="clientName" placeholder="Digite o nome do cliente">
+                        <input type="text" class="form-control" id="clientName" placeholder="Digite o nome do cliente" name="nomeCliente" required>
                     </div>
                     <div class="form-group">
                         <label for="appointmentDate">Data</label>
-                        <input type="date" class="form-control" id="appointmentDate">
+                        <input type="date" class="form-control" id="appointmentDate" name="data" required>
                     </div>
                     <div class="form-group">
                         <label for="appointmentTime">Horário</label>
-                        <input type="time" class="form-control" id="appointmentTime">
+                        <input type="time" class="form-control" id="appointmentTime" name="hora" required >
                     </div>
                     <div class="form-group">
                         <label for="service">Serviço</label>
-                        <select class="form-control" id="service">
-                            <option>Selecione o serviço</option>
-                            <option>Corte de Cabelo</option>
-                            <option>Barba</option>
-                            <option>Corte de Cabelo e Barba</option>
+                        <select class="form-control" id="service" name="servico" required>
+                            <option value="">Selecione um serviço</option>
+                            <<?php 
+                                require_once "util/optionServico.php";
+                            ?>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Salvar Agendamento</button>
-                    <a href="index.html" class="btn btn-secondary ml-2">Cancelar</a>
+                    <input type="submit" class="btn btn-primary" value="Salvar Agendamento" name="salvar">
+                    <input type="reset" class="btn btn-secondary" value="Limpar">
                 </form>
             </div>
         </div>
     </main>
 
-    <!-- Rodapé -->
+    <<?php 
+    
+    require_once "util/banco.php";
+    session_start();
+
+    if(isset($_POST['salvar'])){
+        $nomeCliente = $_POST['nomeCliente'];
+        $data = $_POST['data'];
+        $hora = $_POST['hora'];
+        $servico = $_POST['servico'];
+
+        try{
+
+            $verif = $banco->prepare("SELECT * FROM agendamento WHERE nomeCliente = ? AND data = ? AND horario = ?");
+            $verif ->  bind_param("sss", $nomeCliente, $data, $hora);
+            $verif -> execute();
+            $resp = $verif -> get_result();
+
+
+            if($resp->num_rows == 0){
+                criarAgendamento($nomeCliente, $data, $hora, $servico);
+                echo "<script type='text/javascript'>
+                    successAlert();
+                  </script>";    
+            }else{
+                echo "<script type='text/javascript'>
+                    showAlert('O agendamento já existe para o cliente, data e horário informados.');
+                  </script>";                
+            }
+
+            $verif -> close();
+        }
+        catch (mysqli_sql_exception $e) {
+            echo "Erro de SQL: " . $e->getMessage();
+        }
+
+    }
+    
+
+?>
 
 
     <!-- Bootstrap JS e dependências -->

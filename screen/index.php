@@ -34,36 +34,58 @@
     <!-- Conteúdo Principal -->
     <main class="container my-4">
         <div class="button-group text-center">
-            <a href="#" class="btn btn-primary mx-2">Visualizar Próximos Agendamentos</a>
+            <a href="mostrarAgendamentos.php" class="btn btn-primary mx-2">Visualizar Próximos Agendamentos</a>
             <a href="novoAgendamento.php" class="btn btn-secondary mx-2">Novo Agendamento</a>
             <a href="#" class="btn btn-success mx-2">Gerenciar Agendamentos</a>
         </div>
+        <?php 
         
+        include_once "util/banco.php";
+
+        $dataAtual = date("Y-m-d");
+        $horaAtual = date("H:i:s");
+        $query = "SELECT a.id, a.nomeCliente, a.data, a.horario, s.nome AS servico
+                FROM agendamento a
+                JOIN servico s ON a.servicoId = s.id
+                WHERE a.data > ? OR (a.data >= ? AND a.horario >= ?)
+                ORDER BY  a.data, a.horario LIMIT 2";
+
+        $prep = $banco->prepare($query);
+        $prep->bind_param("sss", $dataAtual, $dataAtual, $horaAtual);
+        $prep->execute();
+        $res = $prep->get_result();
+        
+        ?>
+
         <div class="row">
             <div class="col-md-12">
                 <h2>Próximos Agendamentos</h2>
-                <div class="appointment-card card mb-3">
+                <?php 
+                    if($res->num_rows > 0){
+
+                        while($row = $res->fetch_assoc()){
+                            echo '<div class="appointment-card card mb-3">';
+                                echo ' <div class="card-body">';
+                                    echo '<h5 class="card-title">'. htmlspecialchars($row['nomeCliente']). '</h5>';
+                                    echo '<p class="card-text">Data: '. date('d/m/Y', strtotime($row['data'])). '</p>';
+                                    echo ' <p class="card-text">Horário: '. date('H:i', strtotime($row['horario'])). '</p>';
+                                    echo '<p class="card-text">Serviço: '. htmlspecialchars($row['servico']). '</p>';
+                                echo '</div>';
+                            echo '</div>';
+                        }
+
+
+                    }
+                
+                ?>
+                <!-- <div class="appointment-card card mb-3">
                     <div class="card-body">
                         <h5 class="card-title">João Silva</h5>
                         <p class="card-text">Data: 15/09/2024</p>
                         <p class="card-text">Horário: 10:00</p>
                         <p class="card-text">Serviço: Corte de Cabelo</p>
                         <a href="#" class="btn btn-primary">Detalhes</a>
-                    </div>
-                </div>
-                <div class="appointment-card card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Maria Oliveira</h5>
-                        <p class="card-text">Data: 16/09/2024</p>
-                        <p class="card-text">Horário: 14:00</p>
-                        <p class="card-text">Serviço: Barba e Corte</p>
-                        <a href="#" class="btn btn-primary">Detalhes</a>
-                    </div>
-                </div>
-                <!-- Adicione mais cartões de agendamento aqui -->
-            </div>
-        </div>
-    </main>
+                -->
 
     <!-- Bootstrap JS e dependências -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

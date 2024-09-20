@@ -36,7 +36,9 @@
         <div class="button-group text-center">
             <a href="mostrarAgendamentos.php" class="btn btn-primary mx-2">Visualizar Próximos Agendamentos</a>
             <a href="novoAgendamento.php" class="btn btn-secondary mx-2">Novo Agendamento</a>
-            <a href="#" class="btn btn-success mx-2">Gerenciar Agendamentos</a>
+            <a href="novoServico.php" class="btn btn-secondary mx-2">Novo Serviço</a>
+            <a href="gerenciarAgendamento.php" class="btn btn-success mx-2">Gerenciar Agendamentos</a>
+            <a href="gerenciarServico.php" class="btn btn-success mx-2">Gerenciar Serviços</a>
         </div>
         <?php 
         
@@ -75,6 +77,10 @@
                         }
 
 
+                    }else{
+                        echo '<div class="alert alert-info" role="alert">';
+                            echo 'Nenhum agendamento encontrado.';
+                        echo '</div>';
                     }
                 
                 ?>
